@@ -48,8 +48,13 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	// 检查用户名是否存在
 	var existingUser models.User
-	if err := h.db.Where("username = ? OR email = ?", req.Username, req.Email).First(&existingUser).Error; err == nil {
+	err := h.db.Where("username = ? OR email = ?", req.Username, req.Email).First(&existingUser).Error
+	if err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "用户名或邮箱已存在"})
+		return
+	} else if err != gorm.ErrRecordNotFound {
+		// 如果是其他错误而非记录不存在，返回错误
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "数据库查询失败"})
 		return
 	}
 

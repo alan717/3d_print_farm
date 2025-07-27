@@ -23,7 +23,7 @@ type Material struct {
 	Name         string                 `json:"name" gorm:"uniqueIndex;not null"`
 	Description  string                 `json:"description"`
 	PricePerGram float64                `json:"price_per_gram" gorm:"not null"`
-	Properties   map[string]interface{} `json:"properties" gorm:"type:jsonb"`
+	Properties   string `json:"properties" gorm:"type:jsonb"`
 	Available    bool                   `json:"available" gorm:"default:true"`
 	CreatedAt    time.Time              `json:"created_at"`
 	UpdatedAt    time.Time              `json:"updated_at"`

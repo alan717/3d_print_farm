@@ -27,8 +27,14 @@ func main() {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
+	// 设置Gin模式为release模式以减少debug信息
+	gin.SetMode(gin.ReleaseMode)
+
 	// 初始化Gin路由
 	r := gin.Default()
+
+	// 配置信任的代理
+	r.SetTrustedProxies([]string{"127.0.0.1", "localhost"})
 
 	// 添加CORS中间件
 	r.Use(middleware.CORS())
@@ -60,18 +66,14 @@ func main() {
 
 		// 文件路由
 		files := api.Group("/files")
-		files.Use(middleware.AuthRequired())
 		{
-			files.POST("/upload", fileHandler.Upload)
-			files.GET("/:id", fileHandler.GetFile)
-			files.DELETE("/:id", fileHandler.DeleteFile)
+			files.POST("/upload", middleware.AuthRequired(), fileHandler.Upload)
+			files.GET("/:id", fileHandler.GetFile) // 移除认证要求以允许3D预览
+			files.DELETE("/:id", middleware.AuthRequired(), fileHandler.DeleteFile)
 		}
 
-		// 材料路由
-		materials := api.Group("/materials")
-		{
-			materials.GET("/", materialHandler.GetMaterials)
-		}
+		// 材料路由 - 移除末尾斜杠避免重定向
+		api.GET("/materials", materialHandler.GetMaterials)
 
 		// 订单路由
 		orders := api.Group("/orders")
