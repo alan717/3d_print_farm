@@ -1,8 +1,9 @@
 <template>
   <div class="register-page">
-    <el-row justify="center">
-      <el-col :span="10" :xs="22" :sm="18" :md="14" :lg="10">
-        <el-card class="register-card">
+    <div class="register-container">
+      <el-row justify="center">
+        <el-col :span="24" :xs="22" :sm="20" :md="16" :lg="12" :xl="10">
+          <el-card class="register-card">
           <template #header>
             <div class="card-header">
               <h2>用户注册</h2>
@@ -91,6 +92,7 @@
         </el-card>
       </el-col>
     </el-row>
+    </div>
   </div>
 </template>
 
@@ -187,34 +189,133 @@ export default {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
-  padding: 20px;
+  justify-content: center;
+  padding: 20px 16px;
+}
+
+.register-container {
+  width: 100%;
+  max-width: 600px;
 }
 
 .register-card {
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .card-header {
   text-align: center;
+  padding: 10px 0;
 }
 
 .card-header h2 {
   margin: 0;
   color: #333;
+  font-weight: 600;
+  font-size: 1.5rem;
 }
 
 .register-footer {
   text-align: center;
   color: #666;
+  font-size: 14px;
 }
 
 .login-link {
   color: #409eff;
   text-decoration: none;
   margin-left: 5px;
+  font-weight: 500;
 }
 
 .login-link:hover {
   text-decoration: underline;
+  color: #337ecc;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .register-page {
+    padding: 16px 12px;
+  }
+  
+  .card-header h2 {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-page {
+    padding: 12px 8px;
+  }
+  
+  .card-header {
+    padding: 8px 0;
+  }
+  
+  .card-header h2 {
+    font-size: 1.125rem;
+  }
+  
+  .register-footer {
+    font-size: 13px;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 360px) {
+  .register-page {
+    padding: 8px 4px;
+  }
+  
+  :deep(.el-card__body) {
+    padding: 16px;
+  }
+  
+  :deep(.el-form-item) {
+    margin-bottom: 18px;
+  }
+  
+  :deep(.el-input__wrapper) {
+    padding: 8px 12px;
+  }
+}
+
+/* 横屏优化 */
+@media (max-height: 600px) and (orientation: landscape) {
+  .register-page {
+    padding: 12px 16px;
+  }
+  
+  .card-header {
+    padding: 6px 0;
+  }
+  
+  .card-header h2 {
+    font-size: 1.125rem;
+  }
+  
+  :deep(.el-form-item) {
+    margin-bottom: 16px;
+  }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .register-card {
+    background: rgba(28, 28, 30, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .card-header h2 {
+    color: #ffffff;
+  }
+  
+  .register-footer {
+    color: #8e8e93;
+  }
 }
 </style>

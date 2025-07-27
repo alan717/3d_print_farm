@@ -21,5 +21,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets'
+  },
+  optimizeDeps: {
+    include: ['three']
   }
 })

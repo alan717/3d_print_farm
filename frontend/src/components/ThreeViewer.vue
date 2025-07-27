@@ -1,12 +1,16 @@
 <template>
   <div class="three-viewer" ref="containerRef">
     <div v-if="!modelLoaded" class="loading-overlay">
-      <el-icon class="loading-icon" size="40"><loading /></el-icon>
+      <el-icon class="loading-icon" size="40">
+        <Loading />
+      </el-icon>
       <p>加载3D模型中...</p>
     </div>
     
     <div v-if="error" class="error-overlay">
-      <el-icon class="error-icon" size="40"><warning /></el-icon>
+      <el-icon class="error-icon" size="40">
+        <Warning />
+      </el-icon>
       <p>{{ error }}</p>
       <el-button @click="retryLoad">重试</el-button>
     </div>
@@ -33,6 +37,7 @@
 
 <script>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { Loading, Warning } from '@element-plus/icons-vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
@@ -40,6 +45,10 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 
 export default {
   name: 'ThreeViewer',
+  components: {
+    Loading,
+    Warning
+  },
   props: {
     modelUrl: {
       type: String,

@@ -18,12 +18,14 @@
             drag
             action="/api/files/upload"
             :headers="uploadHeaders"
-            :accept=".stl,.obj"
+            accept=".stl,.obj"
             :before-upload="beforeUpload"
             :on-success="onUploadSuccess"
             :on-error="onUploadError"
           >
-            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            <el-icon class="el-icon--upload">
+              <UploadFilled />
+            </el-icon>
             <div class="el-upload__text">
               将文件拖到此处，或<em>点击上传</em>
             </div>
@@ -61,7 +63,9 @@
               @model-stats="onModelStats"
             />
             <div v-else class="preview-placeholder">
-              <el-icon size="60"><view /></el-icon>
+              <el-icon size="60">
+                <View />
+              </el-icon>
               <p>上传模型后将显示3D预览</p>
             </div>
           </div>
@@ -137,6 +141,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useModelStore } from '@/stores/model'
 import { ElMessage } from 'element-plus'
+import { UploadFilled, View } from '@element-plus/icons-vue'
 import axios from 'axios'
 import ThreeViewer from '@/components/ThreeViewer.vue'
 import { ModelGenerator } from '@/utils/modelGenerator.js'
@@ -144,7 +149,9 @@ import { ModelGenerator } from '@/utils/modelGenerator.js'
 export default {
   name: 'Upload',
   components: {
-    ThreeViewer
+    ThreeViewer,
+    UploadFilled,
+    View
   },
   setup() {
     const userStore = useUserStore()
@@ -207,8 +214,14 @@ export default {
     
     const getModelUrl = () => {
       if (!uploadedFile.value) return ''
-      // 假设后端返回文件访问URL
-      return uploadedFile.value.url || `/api/files/${uploadedFile.value.id}`
+      
+      // 如果是演示模型，直接返回blob URL
+      if (uploadedFile.value.url && uploadedFile.value.url.startsWith('blob:')) {
+        return uploadedFile.value.url
+      }
+      
+      // 对于真实上传的文件，使用API端点
+      return uploadedFile.value.url || `http://localhost:8080/api/files/${uploadedFile.value.id}`
     }
     
     const getModelType = () => {
@@ -244,9 +257,17 @@ export default {
     
     const loadDemoModel = () => {
       try {
+        ElMessage.info('正在生成演示模型...')
+        
         // 生成演示立方体模型
         const demoFile = ModelGenerator.createDemoFile('cube', 20)
         const demoUrl = ModelGenerator.createModelURL(demoFile)
+        
+        console.log('演示文件生成成功:', {
+          file: demoFile,
+          url: demoUrl,
+          size: demoFile.size
+        })
         
         // 模拟上传成功的响应
         const mockResponse = {
@@ -264,7 +285,7 @@ export default {
         ElMessage.success('演示模型加载成功！')
       } catch (error) {
         console.error('加载演示模型失败:', error)
-        ElMessage.error('加载演示模型失败')
+        ElMessage.error('加载演示模型失败: ' + error.message)
       }
     }
     
@@ -288,6 +309,7 @@ export default {
     
     return {
       materials,
+      uploadedFile,
       printConfig,
       uploadHeaders,
       estimatedPrice,
