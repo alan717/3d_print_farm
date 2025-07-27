@@ -1,8 +1,4 @@
--- 创建数据库
-CREATE DATABASE printing_farm;
-
--- 使用数据库
-\c printing_farm;
+-- 数据库已存在，直接使用
 
 -- 启用 UUID 扩展
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -91,7 +87,7 @@ INSERT INTO materials (name, description, price_per_gram, properties) VALUES
 ('ABS', '耐用性强，适合功能件', 1.00, '{"temperature": "220-260°C", "flexibility": "中", "strength": "高"}'),
 ('PETG', '透明度好，化学稳定', 1.20, '{"temperature": "220-250°C", "flexibility": "中", "strength": "高"}'),
 ('TPU', '柔性材料，适合弹性件', 2.00, '{"temperature": "210-230°C", "flexibility": "高", "strength": "中等"}'),
-('WOOD', '木质纤维复合材料', 1.50, '{"temperature": "190-220°C", "flexibility": "低", "strength": "中等", "特性": "木质纹理"}'');
+('WOOD', '木质纤维复合材料', 1.50, '{"temperature": "190-220°C", "flexibility": "低", "strength": "中等", "特性": "木质纹理"}');
 
 -- 创建更新时间戳的函数
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -100,7 +96,7 @@ BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ language plpgsql;
 
 -- 为所有表添加更新时间戳触发器
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
