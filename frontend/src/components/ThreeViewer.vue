@@ -257,8 +257,24 @@ export default {
     }
     
     const resetView = () => {
-      if (model) {
+      if (model && model.geometry) {
+        // Reset model rotation
         model.rotation.set(0, 0, 0)
+        
+        // Recalculate proper camera position based on model size
+        const geometry = model.geometry
+        geometry.computeBoundingBox()
+        const box = geometry.boundingBox
+        const size = new THREE.Vector3()
+        box.getSize(size)
+        const maxDim = Math.max(size.x, size.y, size.z)
+        
+        // Set camera position based on model dimensions
+        camera.position.set(maxDim * 1.5, maxDim * 1.5, maxDim * 1.5)
+        controls.target.set(0, 0, 0)
+        controls.update()
+      } else {
+        // Fallback for when no model is loaded
         camera.position.set(5, 5, 5)
         controls.target.set(0, 0, 0)
         controls.update()
