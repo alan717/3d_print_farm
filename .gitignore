@@ -1,0 +1,73 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+node_modules/
+/npm-debug.log*
+/yarn-error.log
+/yarn.lock
+/package-lock.json
+
+# Production
+/dist
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+build/
+dist/
+*.tgz
+*.tar.gz
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Backend
+backend/uploads/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+vendor/
+
+# Database
+*.sqlite
+*.sqlite3
+
+# Go build cache
+.cache/
+
+# Temporary folders
+tmp/
+temp/

@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: printing_farm_db
+    environment:
+      POSTGRES_DB: printing_farm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - printing_farm_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: printing_farm_backend
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/printing_farm?sslmode=disable
+      JWT_SECRET: your-secret-key-change-in-production
+      PORT: 8080
+      UPLOAD_DIR: /uploads
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads_data:/uploads
+    depends_on:
+      - postgres
+    networks:
+      - printing_farm_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: printing_farm_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - printing_farm_network
+
+volumes:
+  postgres_data:
+  uploads_data:
+
+networks:
+  printing_farm_network:
+    driver: bridge
