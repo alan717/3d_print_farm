@@ -20,6 +20,11 @@
       </el-col>
       <el-col :span="6" style="text-align: right;">
         <div v-if="isLoggedIn" class="user-actions">
+          <el-badge :value="cartStore.totalItems" :hidden="cartStore.totalItems === 0" class="cart-badge">
+            <el-button @click="$router.push('/cart')" text>
+              <el-icon size="20"><ShoppingCart /></el-icon>
+            </el-button>
+          </el-badge>
           <el-dropdown>
             <span class="el-dropdown-link">
               {{ userInfo.username }}
@@ -34,6 +39,11 @@
           </el-dropdown>
         </div>
         <div v-else class="auth-buttons">
+          <el-badge :value="cartStore.totalItems" :hidden="cartStore.totalItems === 0" class="cart-badge">
+            <el-button @click="$router.push('/cart')" text>
+              <el-icon size="20"><ShoppingCart /></el-icon>
+            </el-button>
+          </el-badge>
           <el-button @click="$router.push('/login')">登录</el-button>
           <el-button type="primary" @click="$router.push('/register')">注册</el-button>
         </div>
@@ -46,12 +56,19 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useCartStore } from '@/stores/cart'
+import { ShoppingCart, ArrowDown } from '@element-plus/icons-vue'
 
 export default {
   name: 'NavHeader',
+  components: {
+    ShoppingCart,
+    ArrowDown
+  },
   setup() {
     const router = useRouter()
     const userStore = useUserStore()
+    const cartStore = useCartStore()
     
     const isLoggedIn = computed(() => userStore.isLoggedIn)
     const userInfo = computed(() => userStore.userInfo)
@@ -64,6 +81,7 @@ export default {
     return {
       isLoggedIn,
       userInfo,
+      cartStore,
       logout
     }
   }
@@ -110,5 +128,18 @@ export default {
 
 .auth-buttons .el-button {
   margin-left: 10px;
+}
+
+.cart-badge {
+  margin-right: 15px;
+}
+
+.cart-badge .el-button {
+  color: #666;
+  padding: 8px;
+}
+
+.cart-badge .el-button:hover {
+  color: #409eff;
 }
 </style>

@@ -140,6 +140,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useModelStore } from '@/stores/model'
+import { useCartStore } from '@/stores/cart'
 import { ElMessage } from 'element-plus'
 import { UploadFilled, View } from '@element-plus/icons-vue'
 import axios from 'axios'
@@ -156,6 +157,7 @@ export default {
   setup() {
     const userStore = useUserStore()
     const modelStore = useModelStore()
+    const cartStore = useCartStore()
     
     const materials = ref([])
     const uploadedFile = ref(null)
@@ -251,8 +253,57 @@ export default {
     }
     
     const addToCart = () => {
-      // TODO: 实现添加到购物车功能
-      ElMessage.success('已添加到购物车!')
+      // 验证必要信息
+      if (!uploadedFile.value) {
+        ElMessage.warning('请先上传3D模型文件')
+        return
+      }
+      
+      if (!printConfig.materialId) {
+        ElMessage.warning('请选择打印材料')
+        return
+      }
+      
+      if (!printConfig.quality) {
+        ElMessage.warning('请选择打印质量')
+        return
+      }
+
+      // 获取材料信息
+      const selectedMaterial = materials.value.find(m => m.id === printConfig.materialId)
+      if (!selectedMaterial) {
+        ElMessage.error('所选材料不存在')
+        return
+      }
+
+      // 计算价格（这里使用简单的固定价格，实际应该基于模型体积计算）
+      const basePrice = selectedMaterial.price_per_gram * 100 // 假设100克的基础重量
+      const qualityMultiplier = {
+        'fast': 1.0,
+        'standard': 1.2,
+        'high': 1.5
+      }
+      const supportMultiplier = printConfig.supportEnabled ? 1.1 : 1.0
+      const finalPrice = basePrice * qualityMultiplier[printConfig.quality] * supportMultiplier
+
+      // 准备购物车商品数据
+      const cartItem = {
+        fileId: uploadedFile.value.id,
+        fileName: uploadedFile.value.filename || uploadedFile.value.original_name || '3D模型',
+        materialId: printConfig.materialId,
+        materialName: selectedMaterial.name,
+        quality: printConfig.quality,
+        quantity: printConfig.quantity,
+        supportEnabled: printConfig.supportEnabled,
+        price: finalPrice
+      }
+
+      // 添加到购物车
+      const success = cartStore.addItem(cartItem)
+      
+      if (success) {
+        console.log('商品已添加到购物车:', cartItem)
+      }
     }
     
     const loadDemoModel = () => {
