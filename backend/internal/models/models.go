@@ -7,15 +7,32 @@ import (
 	"gorm.io/gorm"
 )
 
+type UserRole string
+type UserStatus string
+
+const (
+	UserRoleUser       UserRole = "user"
+	UserRoleAdmin      UserRole = "admin"
+	UserRoleSuperAdmin UserRole = "super_admin"
+)
+
+const (
+	UserStatusActive   UserStatus = "active"
+	UserStatusInactive UserStatus = "inactive"
+	UserStatusBanned   UserStatus = "banned"
+)
+
 type User struct {
-	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-	Username  string    `json:"username" gorm:"uniqueIndex;not null"`
-	Email     string    `json:"email" gorm:"uniqueIndex;not null"`
-	Password  string    `json:"-" gorm:"not null"`
-	Phone     string    `json:"phone"`
-	Address   string    `json:"address"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        uuid.UUID  `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Username  string     `json:"username" gorm:"uniqueIndex;not null"`
+	Email     string     `json:"email" gorm:"uniqueIndex;not null"`
+	Password  string     `json:"-" gorm:"not null"`
+	Phone     string     `json:"phone"`
+	Address   string     `json:"address"`
+	Role      UserRole   `json:"role" gorm:"default:'user'"`
+	Status    UserStatus `json:"status" gorm:"default:'active'"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
 }
 
 type Material struct {
@@ -110,4 +127,40 @@ func (o *Order) BeforeCreate(tx *gorm.DB) error {
 		o.ID = uuid.New()
 	}
 	return nil
+}
+
+// Admin models
+type SystemSetting struct {
+	ID           uint      `json:"id" gorm:"primaryKey"`
+	SettingKey   string    `json:"setting_key" gorm:"uniqueIndex;not null"`
+	SettingValue string    `json:"setting_value"`
+	Description  string    `json:"description"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type AdminLog struct {
+	ID           uint      `json:"id" gorm:"primaryKey"`
+	AdminID      *uuid.UUID `json:"admin_id" gorm:"type:uuid"`
+	Admin        *User     `json:"admin,omitempty" gorm:"foreignKey:AdminID"`
+	Action       string    `json:"action" gorm:"not null"`
+	ResourceType string    `json:"resource_type" gorm:"not null"`
+	ResourceID   string    `json:"resource_id"`
+	Details      string    `json:"details" gorm:"type:jsonb"`
+	IPAddress    string    `json:"ip_address"`
+	UserAgent    string    `json:"user_agent"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
+type SystemStats struct {
+	ID               uint      `json:"id" gorm:"primaryKey"`
+	StatDate         time.Time `json:"stat_date" gorm:"uniqueIndex;type:date"`
+	TotalUsers       int       `json:"total_users" gorm:"default:0"`
+	TotalOrders      int       `json:"total_orders" gorm:"default:0"`
+	TotalRevenue     float64   `json:"total_revenue" gorm:"type:decimal(15,2);default:0"`
+	TotalFiles       int       `json:"total_files" gorm:"default:0"`
+	ActiveOrders     int       `json:"active_orders" gorm:"default:0"`
+	CompletedOrders  int       `json:"completed_orders" gorm:"default:0"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }

@@ -35,8 +35,9 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="$router.push('/profile')">个人中心</el-dropdown-item>
-                <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item @click="goToProfile">个人中心</el-dropdown-item>
+                <el-dropdown-item @click="goToAdmin" v-if="isAdmin" divided>管理后台</el-dropdown-item>
+                <el-dropdown-item @click="logout" divided>退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -101,6 +102,7 @@
               </div>
               <div class="user-buttons">
                 <el-button @click="goToProfile" plain>个人中心</el-button>
+                <el-button @click="goToAdmin" v-if="isAdmin" plain>管理后台</el-button>
                 <el-button @click="logout" type="danger" plain>退出登录</el-button>
               </div>
             </div>
@@ -142,6 +144,10 @@ export default {
     
     const isLoggedIn = computed(() => userStore.isLoggedIn)
     const userInfo = computed(() => userStore.userInfo)
+    const isAdmin = computed(() => {
+      const role = userStore.userInfo?.role
+      return role === 'admin' || role === 'super_admin'
+    })
     
     const toggleMobileMenu = () => {
       showMobileMenu.value = !showMobileMenu.value
@@ -162,6 +168,11 @@ export default {
       closeMobileMenu()
     }
     
+    const goToAdmin = () => {
+      router.push('/admin/dashboard')
+      closeMobileMenu()
+    }
+    
     const goToLogin = () => {
       router.push('/login')
       closeMobileMenu()
@@ -175,12 +186,14 @@ export default {
     return {
       isLoggedIn,
       userInfo,
+      isAdmin,
       cartStore,
       showMobileMenu,
       toggleMobileMenu,
       closeMobileMenu,
       logout,
       goToProfile,
+      goToAdmin,
       goToLogin,
       goToRegister
     }

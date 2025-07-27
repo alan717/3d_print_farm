@@ -29,7 +29,8 @@ type RegisterRequest struct {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -98,22 +99,51 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 // 登录
 func (h *AuthHandler) Login(c *gin.Context) {
-	var req LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var reqBody map[string]interface{}
+	if err := c.ShouldBindJSON(&reqBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的请求格式"})
 		return
 	}
 
-	// 查找用户
+	// 手动提取字段
+	username, _ := reqBody["username"].(string)
+	email, _ := reqBody["email"].(string)
+	password, _ := reqBody["password"].(string)
+
+	// 验证密码是否提供
+	if password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "密码不能为空"})
+		return
+	}
+
+	// 验证至少提供用户名或邮箱之一
+	if username == "" && email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供用户名或邮箱"})
+		return
+	}
+
+	// 查找用户 - 支持用户名或邮箱登录
 	var user models.User
-	if err := h.db.Where("email = ?", req.Email).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "邮箱或密码错误"})
+	var err error
+	
+	if username != "" {
+		err = h.db.Where("username = ?", username).First(&user).Error
+	} else {
+		err = h.db.Where("email = ?", email).First(&user).Error
+	}
+	
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "用户名/邮箱或密码错误"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "查询用户失败"})
+		}
 		return
 	}
 
 	// 验证密码
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "邮箱或密码错误"})
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户名/邮箱或密码错误"})
 		return
 	}
 

@@ -11,6 +11,8 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
     address TEXT,
+    role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'admin', 'super_admin')),
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'banned')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -89,6 +91,60 @@ INSERT INTO materials (name, description, price_per_gram, properties) VALUES
 ('TPU', '柔性材料，适合弹性件', 2.00, '{"temperature": "210-230°C", "flexibility": "高", "strength": "中等"}'),
 ('WOOD', '木质纤维复合材料', 1.50, '{"temperature": "190-220°C", "flexibility": "低", "strength": "中等", "特性": "木质纹理"}');
 
+-- 创建管理员账户 (密码: admin123)
+INSERT INTO users (username, email, password, role, status) VALUES
+('admin', 'admin@3dprinting.com', '$2a$10$i5aiudtbgrCFZ8t8/nlloeVkDHDhJ6a0kowmlauNHIKJcFve/IIIG', 'super_admin', 'active');
+
+-- 系统设置表
+CREATE TABLE system_settings (
+    id SERIAL PRIMARY KEY,
+    setting_key VARCHAR(100) UNIQUE NOT NULL,
+    setting_value TEXT,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 管理员操作日志表
+CREATE TABLE admin_logs (
+    id SERIAL PRIMARY KEY,
+    admin_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    action VARCHAR(100) NOT NULL,
+    resource_type VARCHAR(50) NOT NULL,
+    resource_id VARCHAR(100),
+    details JSONB,
+    ip_address INET,
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 系统统计表
+CREATE TABLE system_stats (
+    id SERIAL PRIMARY KEY,
+    stat_date DATE UNIQUE NOT NULL,
+    total_users INTEGER DEFAULT 0,
+    total_orders INTEGER DEFAULT 0,
+    total_revenue DECIMAL(15,2) DEFAULT 0.00,
+    total_files INTEGER DEFAULT 0,
+    active_orders INTEGER DEFAULT 0,
+    completed_orders INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 插入默认系统设置
+INSERT INTO system_settings (setting_key, setting_value, description) VALUES
+('site_name', '3D打印农场', '网站名称'),
+('site_description', '专业的云端3D打印服务平台', '网站描述'),
+('max_file_size', '52428800', '最大文件上传大小（字节）'),
+('supported_formats', 'STL,OBJ', '支持的文件格式'),
+('default_material', '1', '默认材料ID'),
+('maintenance_mode', 'false', '维护模式'),
+('auto_approve_orders', 'false', '自动审核订单');
+
+-- 初始化今日统计
+INSERT INTO system_stats (stat_date) VALUES (CURRENT_DATE);
+
 -- 创建更新时间戳的函数
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -112,4 +168,10 @@ CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_order_items_updated_at BEFORE UPDATE ON order_items
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_system_settings_updated_at BEFORE UPDATE ON system_settings
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_system_stats_updated_at BEFORE UPDATE ON system_stats
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

@@ -45,6 +45,7 @@ func main() {
 	fileHandler := handlers.NewFileHandler(db)
 	orderHandler := handlers.NewOrderHandler(db)
 	materialHandler := handlers.NewMaterialHandler(db)
+	adminHandler := handlers.NewAdminHandler(db)
 
 	// API路由组
 	api := r.Group("/api")
@@ -83,6 +84,34 @@ func main() {
 			orders.GET("/", orderHandler.GetUserOrders)
 			orders.GET("/:id", orderHandler.GetOrder)
 			orders.PUT("/:id/status", orderHandler.UpdateOrderStatus)
+		}
+
+		// 管理员路由
+		admin := api.Group("/admin")
+		admin.Use(middleware.AuthRequired(), handlers.AdminMiddleware(db))
+		{
+			// 仪表板
+			admin.GET("/dashboard", adminHandler.GetDashboardStats)
+
+			// 用户管理
+			admin.GET("/users", adminHandler.GetUsers)
+			admin.PUT("/users/:id/status", adminHandler.UpdateUserStatus)
+
+			// 订单管理
+			admin.GET("/orders", adminHandler.GetOrders)
+			admin.PUT("/orders/:id/status", adminHandler.UpdateOrderStatus)
+
+			// 材料管理
+			admin.POST("/materials", adminHandler.CreateMaterial)
+			admin.PUT("/materials/:id", adminHandler.UpdateMaterial)
+			admin.DELETE("/materials/:id", adminHandler.DeleteMaterial)
+
+			// 系统设置
+			admin.GET("/settings", adminHandler.GetSystemSettings)
+			admin.PUT("/settings/:key", adminHandler.UpdateSystemSetting)
+
+			// 操作日志
+			admin.GET("/logs", adminHandler.GetAdminLogs)
 		}
 	}
 

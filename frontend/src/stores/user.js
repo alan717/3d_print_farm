@@ -70,6 +70,17 @@ export const useUserStore = defineStore('user', () => {
     fetchUserInfo()
   }
 
+  const setToken = (authToken) => {
+    token.value = authToken
+    localStorage.setItem('token', authToken)
+    axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
+  }
+
+  const setUserInfo = (user) => {
+    userInfo.value = user
+    localStorage.setItem('userInfo', JSON.stringify(user))
+  }
+
   return {
     userInfo,
     token,
@@ -77,6 +88,8 @@ export const useUserStore = defineStore('user', () => {
     login,
     register,
     logout,
-    fetchUserInfo
+    fetchUserInfo,
+    setToken,
+    setUserInfo
   }
 })
