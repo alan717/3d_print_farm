@@ -148,7 +148,7 @@ export default {
 
 .feature-card {
   text-align: center;
-  min-height: 200px;
+  height: 220px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -190,7 +190,7 @@ export default {
 }
 
 .material-card {
-  min-height: 150px;
+  height: 150px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -248,7 +248,7 @@ export default {
   }
 
   .feature-card {
-    min-height: 180px;
+    height: 180px;
     margin-bottom: 15px;
   }
 
@@ -271,7 +271,7 @@ export default {
   }
 
   .material-card {
-    min-height: 140px;
+    height: 140px;
     margin-bottom: 15px;
   }
 
@@ -315,7 +315,7 @@ export default {
   }
 
   .feature-card {
-    min-height: 160px;
+    height: 160px;
     margin-bottom: 12px;
   }
 
@@ -340,7 +340,7 @@ export default {
   }
 
   .material-card {
-    min-height: 120px;
+    height: 120px;
     margin-bottom: 12px;
   }
 
