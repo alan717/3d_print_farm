@@ -296,10 +296,14 @@ export default {
     
     const loadMaterials = async () => {
       try {
+        console.log('正在加载材料列表...')
         const response = await axios.get('/api/materials')
+        console.log('材料数据:', response.data)
         materials.value = response.data
+        console.log('materials.value:', materials.value)
       } catch (error) {
-        ElMessage.error('加载材料列表失败')
+        console.error('加载材料失败:', error)
+        ElMessage.error('加载材料列表失败: ' + (error.response?.data?.error || error.message))
       }
     }
     
